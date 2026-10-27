@@ -1,5 +1,5 @@
 const NOME_USUARIO = "Maria";
-const ROTULOS_RISCO = { alto: "🔴 Risco alto", medio: "🟡 Risco médio", baixo: "🟢 Risco baixo" };
+const ROTULOS_RISCO = { alto: "Risco alto", medio: "Risco médio", baixo: "Risco baixo" };
 const PREFIXO_AUDIO = "[TRANSCRIÇÃO DE ÁUDIO] ";
 
 const conversa = document.getElementById("conversa");
@@ -11,6 +11,21 @@ const statusChat = document.getElementById("status-chat");
 const notificacoes = document.getElementById("notificacoes");
 
 let veioDeAudio = false;
+let modoAtual = "demonstracao";
+
+const DICAS_MODO = {
+  real: "IA ao vivo: escreva ou grave qualquer mensagem. Cada análise custa cerca de US$ 0,03.",
+  demonstracao: "Respostas salvas: escolha um dos exemplos acima. Não gasta créditos.",
+};
+
+function definirModo(modo) {
+  modoAtual = modo;
+  document.querySelectorAll(".seletor-modo button").forEach((b) => {
+    b.classList.toggle("ativo", b.dataset.modo === modo);
+  });
+  document.getElementById("dica-modo").textContent = DICAS_MODO[modo];
+  try { localStorage.setItem("avera-modo", modo); } catch {}
+}
 
 function escapar(texto) {
   const div = document.createElement("div");
@@ -39,9 +54,9 @@ function falar(texto) {
 }
 
 function mostrarAnalise(r) {
-  let html = `<span class="risco ${r.nivel_risco}">${ROTULOS_RISCO[r.nivel_risco]}</span>\n`;
-  html += escapar(r.resposta_para_usuario);
-  html += `<br><button class="ouvir">🔊 Ouvir de novo</button>`;
+  let html = `<span class="risco">${ROTULOS_RISCO[r.nivel_risco]}</span>`;
+  html += `<p>${escapar(r.resposta_para_usuario)}</p>`;
+  html += `<button class="ouvir">🔊 Ouvir de novo</button>`;
 
   if (r.orientacao_pos_golpe) {
     html += `<details open><summary>O que fazer agora</summary><ol>`;
@@ -51,7 +66,7 @@ function mostrarAnalise(r) {
   if (r.sinais.length) {
     html += `<details><summary>Por que desconfiei (${r.sinais.length})</summary><ul>`;
     html += r.sinais
-      .map((s) => `<li><strong>${escapar(s.tipo)}</strong><span class="trecho">“${escapar(s.trecho)}”</span>${escapar(s.explicacao)}</li>`)
+      .map((s) => `<li><span class="sinal">${escapar(s.tipo)}</span><span class="trecho">“${escapar(s.trecho)}”</span>${escapar(s.explicacao)}</li>`)
       .join("");
     html += `</ul></details>`;
   }
@@ -59,7 +74,7 @@ function mostrarAnalise(r) {
     html += `<details><summary>Como conferir</summary><p>${escapar(r.pergunta_verificacao)}</p></details>`;
   }
 
-  const balao = adicionarBalao(html, "recebido");
+  const balao = adicionarBalao(html, `recebido analise ${r.nivel_risco}`);
   balao.querySelector(".ouvir").addEventListener("click", () => falar(r.resposta_para_usuario));
   falar(r.resposta_para_usuario);
 
@@ -70,7 +85,9 @@ function alertarGuardiao(texto) {
   notificacoes.querySelector(".vazio")?.remove();
   const aviso = document.createElement("div");
   aviso.className = "notificacao";
-  aviso.innerHTML = `<strong><span class="ponto"></span>AVERA · agora</strong>${escapar(texto)}`;
+  aviso.innerHTML =
+    `<strong><span class="icone"><svg><use href="#escudo"/></svg></span>AVERA<span class="quando">agora</span></strong>` +
+    escapar(texto);
   setTimeout(() => notificacoes.prepend(aviso), 1200);
 }
 
@@ -84,14 +101,14 @@ async function enviar() {
   campo.value = "";
   veioDeAudio = false;
   botaoEnviar.disabled = true;
-  statusChat.textContent = "analisando...";
-  const digitando = adicionarBalao(`<span class="digitando">Avera está conferindo a mensagem...</span>`, "recebido");
+  statusChat.textContent = "conferindo a mensagem...";
+  const digitando = adicionarBalao(`<span class="digitando"><i></i><i></i><i></i></span>`, "recebido");
 
   try {
     const resposta = await fetch("/api/analisar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mensagem, contexto: contexto.value, nome_usuario: NOME_USUARIO }),
+      body: JSON.stringify({ mensagem, contexto: contexto.value, nome_usuario: NOME_USUARIO, modo: modoAtual }),
     });
     const dados = await resposta.json();
     digitando.remove();
@@ -160,9 +177,19 @@ async function iniciar() {
   );
 
   const status = await (await fetch("/api/status")).json();
-  const modo = document.getElementById("modo");
-  modo.className = `modo ${status.modo}`;
-  modo.textContent = status.modo === "real" ? "● IA ao vivo" : "● Modo demonstração";
+  const botaoReal = document.querySelector('.seletor-modo [data-modo="real"]');
+  document.querySelectorAll(".seletor-modo button").forEach((b) => {
+    b.addEventListener("click", () => definirModo(b.dataset.modo));
+  });
+  let salvo = null;
+  try { salvo = localStorage.getItem("avera-modo"); } catch {}
+  if (status.chave_configurada) {
+    definirModo(salvo || "demonstracao");
+  } else {
+    botaoReal.disabled = true;
+    botaoReal.title = "Coloque uma chave da API no .env para usar a IA ao vivo";
+    definirModo("demonstracao");
+  }
 
   const lista = document.getElementById("lista-exemplos");
   status.exemplos.forEach((ex) => {

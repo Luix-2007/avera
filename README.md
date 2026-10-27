@@ -50,8 +50,10 @@ python avera/app.py
 
 Abra http://localhost:8000. A tela mostra o celular da usuária conversando com o Avera e, ao lado, o celular da guardiã, que recebe os alertas.
 
-- **Sem chave da API:** roda em **modo demonstração**, com respostas salvas para os 7 exemplos.
-- **Com chave:** copie `.env.example` para `.env`, coloque sua chave da API da Anthropic e o Avera passa a analisar qualquer mensagem com a IA ao vivo.
+No topo da página há um seletor com dois modos:
+
+- **Respostas salvas** (padrão): responde só os 7 exemplos, com análises já geradas pelo Claude. Não gasta créditos.
+- **IA ao vivo:** analisa qualquer mensagem digitada ou gravada, gerando a resposta na hora. Exige uma chave da API da Anthropic: copie `.env.example` para `.env` e coloque a sua chave. Sem chave, esse modo fica desativado.
 
 Para rodar os 7 casos de teste contra a API: `python avera/testar_casos.py`.
 

@@ -4,23 +4,43 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Avera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/estilo.css">
 </head>
 <body>
+<!-- Ícone do escudo, reaproveitado no logo, no chat e nas notificações -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="escudo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z"/>
+    <path d="M9 12l2 2 4-4"/>
+  </symbol>
+</svg>
+
 <header class="topo">
   <div class="marca">
-    <span class="logo">A</span>
+    <span class="logo"><svg><use href="#escudo"/></svg></span>
     <div>
       <h1>Avera</h1>
-      <p>IA que protege de golpes feitos com IA</p>
+      <p>Seu escudo contra golpes no WhatsApp</p>
     </div>
   </div>
-  <span id="modo" class="modo"></span>
+  <div class="seletor-modo" role="group" aria-label="Modo de análise">
+    <button data-modo="real" title="Cada resposta é gerada na hora pelo Claude (custa cerca de US$ 0,03)">IA ao vivo</button>
+    <button data-modo="demonstracao" title="Só os exemplos, com respostas já geradas, sem gastar créditos">Respostas salvas</button>
+  </div>
 </header>
 
+<section class="chamada">
+  <h2>IA que protege dos <span>golpes feitos com IA</span></h2>
+  <p>Encaminhe uma mensagem ou áudio suspeito. O Avera explica o risco em linguagem simples, por voz, e avisa quem cuida de você.</p>
+</section>
+
 <section class="exemplos">
-  <span>Exemplos:</span>
+  <span>Experimente um exemplo</span>
   <div id="lista-exemplos"></div>
+  <p id="dica-modo" class="dica-modo"></p>
 </section>
 
 <main class="palco">
@@ -28,7 +48,7 @@
   <div class="celular">
     <div class="tela">
       <div class="barra-chat">
-        <span class="avatar">A</span>
+        <span class="avatar"><svg><use href="#escudo"/></svg></span>
         <div>
           <strong>Avera</strong>
           <small id="status-chat">online</small>
@@ -39,22 +59,26 @@
 
       <div class="entrada">
         <select id="contexto" title="De onde veio a mensagem?">
-          <option value="número desconhecido">De um número desconhecido</option>
-          <option value="é o número salvo do meu parente">Do número salvo de um parente</option>
-          <option value="SMS">Por SMS</option>
-          <option value="número desconhecido. Eu já fiz o Pix.">Eu já fiz o Pix</option>
+          <option value="número desconhecido">📱 De um número desconhecido</option>
+          <option value="é o número salvo do meu parente">👪 Do número salvo de um parente</option>
+          <option value="SMS">💬 Por SMS</option>
+          <option value="número desconhecido. Eu já fiz o Pix.">💸 Eu já fiz o Pix</option>
         </select>
         <div class="linha-entrada">
           <textarea id="mensagem" rows="1" placeholder="Cole ou encaminhe a mensagem suspeita"></textarea>
-          <button id="microfone" class="botao-redondo" title="Gravar áudio">🎤</button>
-          <button id="enviar" class="botao-redondo enviar" title="Enviar">➤</button>
+          <button id="microfone" class="botao-redondo" title="Gravar áudio">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          </button>
+          <button id="enviar" class="botao-redondo enviar" title="Enviar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
         </div>
       </div>
     </div>
     <p class="legenda">Celular da Maria</p>
   </div>
 
-  <!-- Celular do guardião -->
+  <!-- Celular da guardiã -->
   <div class="celular guardiao">
     <div class="tela bloqueio">
       <div id="hora" class="hora"></div>
@@ -63,7 +87,7 @@
         <p class="vazio">Nenhum alerta por enquanto.</p>
       </div>
     </div>
-    <p class="legenda">Celular da Ana, filha da Maria (guardiã)</p>
+    <p class="legenda">Celular da Ana, filha e guardiã da Maria</p>
   </div>
 </main>
 
