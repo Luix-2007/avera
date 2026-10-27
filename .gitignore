@@ -1,3 +1,4 @@
 .env
 __pycache__/
 avera/resultados_testes.json
+.claude/

@@ -31,8 +31,12 @@ prompt/
   system_prompt.md     Prompt de sistema do Avera (regras, sinais, formato JSON)
   exemplos_teste.md    7 casos de teste com o resultado esperado
 avera/
+  app.py               Servidor web (FastAPI)
   analisador.py        Envia a mensagem ao Claude e devolve a análise em JSON
+  casos.py             Os 7 casos de teste
   testar_casos.py      Roda os 7 casos e verifica as respostas
+  respostas_demo.json  Respostas usadas no modo demonstração
+  static/              Interface web no estilo do WhatsApp
 ```
 
 ## Como rodar
@@ -41,12 +45,21 @@ Requer Python 3.10+.
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env   # depois coloque sua chave da API da Anthropic no .env
-python avera/testar_casos.py
+python avera/app.py
 ```
+
+Abra http://localhost:8000. A tela mostra o celular da usuária conversando com o Avera e, ao lado, o celular da guardiã, que recebe os alertas.
+
+- **Sem chave da API:** roda em **modo demonstração**, com respostas salvas para os 7 exemplos.
+- **Com chave:** copie `.env.example` para `.env`, coloque sua chave da API da Anthropic e o Avera passa a analisar qualquer mensagem com a IA ao vivo.
+
+Para rodar os 7 casos de teste contra a API: `python avera/testar_casos.py`.
+
+O botão de microfone usa o reconhecimento de voz do navegador (funciona no Google Chrome).
 
 ## Tecnologias
 
 - **Claude Opus 5.5** (API da Anthropic) com saída estruturada em JSON
 - **Python** + **FastAPI**
-- Web Speech API do navegador para transcrição e leitura em voz alta (interface em desenvolvimento)
+- HTML, CSS e JavaScript puros na interface
+- Web Speech API do navegador para transcrever áudio e ler a resposta em voz alta

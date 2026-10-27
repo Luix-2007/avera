@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avera</title>
+<link rel="stylesheet" href="/static/estilo.css">
+</head>
+<body>
+<header class="topo">
+  <div class="marca">
+    <span class="logo">A</span>
+    <div>
+      <h1>Avera</h1>
+      <p>IA que protege de golpes feitos com IA</p>
+    </div>
+  </div>
+  <span id="modo" class="modo"></span>
+</header>
+
+<section class="exemplos">
+  <span>Exemplos:</span>
+  <div id="lista-exemplos"></div>
+</section>
+
+<main class="palco">
+  <!-- Celular da Maria -->
+  <div class="celular">
+    <div class="tela">
+      <div class="barra-chat">
+        <span class="avatar">A</span>
+        <div>
+          <strong>Avera</strong>
+          <small id="status-chat">online</small>
+        </div>
+      </div>
+
+      <div id="conversa" class="conversa"></div>
+
+      <div class="entrada">
+        <select id="contexto" title="De onde veio a mensagem?">
+          <option value="número desconhecido">De um número desconhecido</option>
+          <option value="é o número salvo do meu parente">Do número salvo de um parente</option>
+          <option value="SMS">Por SMS</option>
+          <option value="número desconhecido. Eu já fiz o Pix.">Eu já fiz o Pix</option>
+        </select>
+        <div class="linha-entrada">
+          <textarea id="mensagem" rows="1" placeholder="Cole ou encaminhe a mensagem suspeita"></textarea>
+          <button id="microfone" class="botao-redondo" title="Gravar áudio">🎤</button>
+          <button id="enviar" class="botao-redondo enviar" title="Enviar">➤</button>
+        </div>
+      </div>
+    </div>
+    <p class="legenda">Celular da Maria</p>
+  </div>
+
+  <!-- Celular do guardião -->
+  <div class="celular guardiao">
+    <div class="tela bloqueio">
+      <div id="hora" class="hora"></div>
+      <div id="data" class="data"></div>
+      <div id="notificacoes" class="notificacoes">
+        <p class="vazio">Nenhum alerta por enquanto.</p>
+      </div>
+    </div>
+    <p class="legenda">Celular da Ana, filha da Maria (guardiã)</p>
+  </div>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
