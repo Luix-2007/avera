@@ -21,7 +21,7 @@ sys.path.insert(0, str(PASTA))
 import analisador  # noqa: E402
 from casos import CASOS  # noqa: E402
 
-MODO_REAL = bool(os.environ.get("ANTHROPIC_API_KEY"))
+MODO_REAL = bool(os.environ.get("ANTHROPIC_API_KEY"))  # analisador já leu o .env
 RESPOSTAS_DEMO = json.loads((PASTA / "respostas_demo.json").read_text(encoding="utf-8"))
 
 app = FastAPI(title="Avera")

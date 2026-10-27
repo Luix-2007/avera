@@ -12,15 +12,20 @@ MODELO = "claude-opus-5-5"
 
 
 def _carregar_env():
-    """Lê ANTHROPIC_API_KEY de um arquivo .env na raiz do projeto, se existir."""
-    arquivo = RAIZ / ".env"
-    if not arquivo.exists():
-        return
-    for linha in arquivo.read_text(encoding="utf-8").splitlines():
-        linha = linha.strip()
-        if linha and not linha.startswith("#") and "=" in linha:
-            chave, valor = linha.split("=", 1)
-            os.environ.setdefault(chave.strip(), valor.strip().strip('"'))
+    """Lê ANTHROPIC_API_KEY de .env (na raiz) ou de avera/API_key.env, se existirem.
+
+    Aceita linhas no formato ANTHROPIC_API_KEY=... ou só a chave (sk-ant-...).
+    """
+    for arquivo in (RAIZ / ".env", RAIZ / "avera" / "API_key.env"):
+        if not arquivo.exists():
+            continue
+        for linha in arquivo.read_text(encoding="utf-8-sig").splitlines():
+            linha = linha.strip().strip('"')
+            if linha.startswith("sk-ant-"):
+                os.environ.setdefault("ANTHROPIC_API_KEY", linha)
+            elif linha and not linha.startswith("#") and "=" in linha:
+                chave, valor = linha.split("=", 1)
+                os.environ.setdefault(chave.strip(), valor.strip().strip('"'))
 
 
 _carregar_env()
