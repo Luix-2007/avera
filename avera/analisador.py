@@ -1,0 +1,97 @@
+"""Núcleo do Avera: envia a mensagem suspeita ao Claude e devolve a análise em JSON."""
+
+import json
+import os
+from pathlib import Path
+
+import anthropic
+
+RAIZ = Path(__file__).resolve().parent.parent
+PROMPT_SISTEMA = (RAIZ / "prompt" / "system_prompt.md").read_text(encoding="utf-8")
+MODELO = "claude-opus-5-5"
+
+
+def _carregar_env():
+    """Lê ANTHROPIC_API_KEY de um arquivo .env na raiz do projeto, se existir."""
+    arquivo = RAIZ / ".env"
+    if not arquivo.exists():
+        return
+    for linha in arquivo.read_text(encoding="utf-8").splitlines():
+        linha = linha.strip()
+        if linha and not linha.startswith("#") and "=" in linha:
+            chave, valor = linha.split("=", 1)
+            os.environ.setdefault(chave.strip(), valor.strip().strip('"'))
+
+
+_carregar_env()
+cliente = anthropic.Anthropic()
+
+TEXTO_OU_NULO = {"anyOf": [{"type": "string"}, {"type": "null"}]}
+
+ESQUEMA_RESPOSTA = {
+    "type": "object",
+    "properties": {
+        "nivel_risco": {"type": "string", "enum": ["baixo", "medio", "alto"]},
+        "sinais": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "tipo": {"type": "string"},
+                    "trecho": {"type": "string"},
+                    "explicacao": {"type": "string"},
+                },
+                "required": ["tipo", "trecho", "explicacao"],
+                "additionalProperties": False,
+            },
+        },
+        "resposta_para_usuario": {"type": "string"},
+        "acao_recomendada": {"type": "string"},
+        "pergunta_verificacao": TEXTO_OU_NULO,
+        "orientacao_pos_golpe": {
+            "anyOf": [{"type": "array", "items": {"type": "string"}}, {"type": "null"}]
+        },
+        "alertar_guardiao": {"type": "boolean"},
+        "mensagem_para_guardiao": TEXTO_OU_NULO,
+    },
+    "required": [
+        "nivel_risco",
+        "sinais",
+        "resposta_para_usuario",
+        "acao_recomendada",
+        "pergunta_verificacao",
+        "orientacao_pos_golpe",
+        "alertar_guardiao",
+        "mensagem_para_guardiao",
+    ],
+    "additionalProperties": False,
+}
+
+
+def montar_entrada(mensagem: str, contexto: str = "", nome_usuario: str = "") -> str:
+    partes = []
+    if nome_usuario:
+        partes.append(f"<nome_usuario>{nome_usuario}</nome_usuario>")
+    if contexto:
+        partes.append(f"<contexto>{contexto}</contexto>")
+    partes.append(f"<mensagem_suspeita>\n{mensagem}\n</mensagem_suspeita>")
+    return "\n".join(partes)
+
+
+def analisar(mensagem: str, contexto: str = "", nome_usuario: str = "") -> dict:
+    resposta = cliente.beta.messages.create(
+        model=MODELO,
+        max_tokens=4000,
+        betas=["server-side-fallback-2026-07-01"],
+        fallbacks="default",
+        system=PROMPT_SISTEMA,
+        output_config={
+            "effort": "low",
+            "format": {"type": "json_schema", "schema": ESQUEMA_RESPOSTA},
+        },
+        messages=[{"role": "user", "content": montar_entrada(mensagem, contexto, nome_usuario)}],
+    )
+    if resposta.stop_reason == "refusal":
+        raise RuntimeError("O modelo recusou a análise desta mensagem.")
+    texto = next(b.text for b in resposta.content if b.type == "text")
+    return json.loads(texto)
