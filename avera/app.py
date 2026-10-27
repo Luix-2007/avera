@@ -62,7 +62,10 @@ def analisar(pedido: Pedido):
 
     if MODO_REAL and pedido.modo == "real":
         try:
-            return analisador.analisar(pedido.mensagem, pedido.contexto, pedido.nome_usuario)
+            analise, detalhes = analisador.analisar_com_detalhes(
+                pedido.mensagem, pedido.contexto, pedido.nome_usuario
+            )
+            return {**analise, "_detalhes": detalhes}
         except Exception as erro:  # noqa: BLE001
             raise HTTPException(502, f"Não foi possível analisar agora: {erro}") from erro
 

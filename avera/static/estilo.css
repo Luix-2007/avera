@@ -334,6 +334,28 @@ details p { margin: 6px 0 0; }
   color: var(--texto);
 }
 
+/* Rodapé técnico (IA ao vivo) */
+details.tecnico { font-size: 11px; }
+details.tecnico summary {
+  font-weight: 500;
+  color: var(--texto-suave);
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+}
+details.tecnico summary::after { content: ""; }
+details.tecnico pre {
+  margin: 8px 0 0;
+  padding: 10px;
+  max-height: 220px;
+  overflow: auto;
+  border-radius: 10px;
+  background: #16132b;
+  color: #c9f7ea;
+  font-size: 10.5px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 /* Digitando */
 .digitando { display: inline-flex; gap: 4px; padding: 4px 2px; }
 .digitando i {

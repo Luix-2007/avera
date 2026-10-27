@@ -2,6 +2,7 @@
 
 import json
 import os
+import time
 from pathlib import Path
 
 import anthropic
@@ -9,6 +10,9 @@ import anthropic
 RAIZ = Path(__file__).resolve().parent.parent
 PROMPT_SISTEMA = (RAIZ / "prompt" / "system_prompt.md").read_text(encoding="utf-8")
 MODELO = "claude-opus-5-5"
+# Preço do Claude Opus 5.5 em US$ por token (US$ 4 e US$ 20 por milhão)
+PRECO_ENTRADA = 4 / 1_000_000
+PRECO_SAIDA = 20 / 1_000_000
 
 
 def _carregar_env():
@@ -84,6 +88,12 @@ def montar_entrada(mensagem: str, contexto: str = "", nome_usuario: str = "") ->
 
 
 def analisar(mensagem: str, contexto: str = "", nome_usuario: str = "") -> dict:
+    return analisar_com_detalhes(mensagem, contexto, nome_usuario)[0]
+
+
+def analisar_com_detalhes(mensagem: str, contexto: str = "", nome_usuario: str = "") -> tuple[dict, dict]:
+    """Devolve a análise e os dados técnicos da chamada (modelo, tempo, tokens, custo)."""
+    inicio = time.perf_counter()
     resposta = cliente.beta.messages.create(
         model=MODELO,
         max_tokens=4000,
@@ -99,4 +109,12 @@ def analisar(mensagem: str, contexto: str = "", nome_usuario: str = "") -> dict:
     if resposta.stop_reason == "refusal":
         raise RuntimeError("O modelo recusou a análise desta mensagem.")
     texto = next(b.text for b in resposta.content if b.type == "text")
-    return json.loads(texto)
+    entrada, saida = resposta.usage.input_tokens, resposta.usage.output_tokens
+    detalhes = {
+        "modelo": resposta.model,
+        "segundos": round(time.perf_counter() - inicio, 1),
+        "tokens_entrada": entrada,
+        "tokens_saida": saida,
+        "custo_usd": round(entrada * PRECO_ENTRADA + saida * PRECO_SAIDA, 4),
+    }
+    return json.loads(texto), detalhes

@@ -74,11 +74,30 @@ function mostrarAnalise(r) {
     html += `<details><summary>Como conferir</summary><p>${escapar(r.pergunta_verificacao)}</p></details>`;
   }
 
+  if (r._detalhes) html += rodapeTecnico(r);
+
   const balao = adicionarBalao(html, `recebido analise ${r.nivel_risco}`);
   balao.querySelector(".ouvir").addEventListener("click", () => falar(r.resposta_para_usuario));
   falar(r.resposta_para_usuario);
 
   if (r.alertar_guardiao && r.mensagem_para_guardiao) alertarGuardiao(r.mensagem_para_guardiao);
+}
+
+// Rodapé do modo IA ao vivo: mostra que a resposta veio da API agora
+function rodapeTecnico(r) {
+  const d = r._detalhes;
+  const { _detalhes, ...analise } = r;
+  const numero = (n) => n.toLocaleString("pt-BR");
+  const resumo = [
+    d.modelo,
+    `${numero(d.segundos)} s`,
+    `${numero(d.tokens_entrada)} → ${numero(d.tokens_saida)} tokens`,
+    `US$ ${d.custo_usd.toLocaleString("pt-BR", { minimumFractionDigits: 3, maximumFractionDigits: 3 })}`,
+  ].join(" · ");
+  return (
+    `<details class="tecnico"><summary>⚡ ${escapar(resumo)} · ver JSON</summary>` +
+    `<pre>${escapar(JSON.stringify(analise, null, 2))}</pre></details>`
+  );
 }
 
 function alertarGuardiao(texto) {
