@@ -4,3 +4,6 @@ avera/resultados_testes.json
 .claude/
 *.env
 !.env.example
+
+# Efeitos sonoros e vozes de terceiros (licença não permite redistribuir)
+roteiro/cenas/*.mp3
